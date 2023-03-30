@@ -20,9 +20,15 @@ namespace BlackJack
         {
             Decks.Clear();
         }
-        public void AddDeck(Card card)
+        public void AddDeck(byte CurDeck, Card card)
         {
-            Decks.Add(new Card[] {card});
+            //Decks.Add(new Card[] {card});
+            if (CurDeck == Decks.Count)
+            {
+                Decks.Insert(CurDeck, new Card[] { card });
+            }
+            else
+                Decks.Insert(CurDeck + 1, new Card[] { card });
         }
         public void AddCard(byte Deck, Card card)
         {
@@ -104,17 +110,15 @@ namespace BlackJack
             return false;
         }
 
-        public string[] GetCardsString()
+        public string GetCardsString(byte Deck)
         {
-            string[] output = new string[Decks.Count];
-            for (byte i = 0; i < Decks.Count; i++)
+            string output = "|";
+
+            foreach (Card card in Decks[Deck])
             {
-                foreach (Card card in Decks[i])
-                {
-                    output[i] += card.ToString() + "|";
-                }
+                output += card.ToString() + "|";
             }
-            return output;
+        return output;
         }
 
     }

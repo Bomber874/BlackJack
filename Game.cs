@@ -54,7 +54,7 @@ namespace BlackJack
             if (players.Count > 5) return;
 
             //Cards = Deck.Generate(true);
-            Cards = new Queue<Card>(new Card[] { new Card() { Rank=(Rank)4,Suit=(Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 } });
+            Cards = new Queue<Card>(new Card[] { new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 } });
             _Players.Clear();
 
             for (byte i = 0; i < 2; i++)    // Первая сдача
@@ -66,7 +66,7 @@ namespace BlackJack
                         p.ClearCards();
                         _Players.Add(p);
                         Card card = Cards.Dequeue();
-                        p.AddDeck(card);
+                        p.AddDeck(0, card);
                         OnPlayerTakeCard?.Invoke(p, 0, card, true);
                     }
                     else
@@ -131,7 +131,7 @@ namespace BlackJack
                         PlayerActionsLoop(player, deck, null);
                         return;
                     }
-                    player.AddDeck(player.RemoveLastCard(deck));
+                    player.AddDeck(deck, player.RemoveLastCard(deck));
                     AddPlayerCard(player, deck, Cards.Dequeue(), false);
                     AddPlayerCard(player, (byte)(deck + 1), Cards.Dequeue(), false);
                     PlayerActionsLoop(player, deck, null);
