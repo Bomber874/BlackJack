@@ -6,6 +6,9 @@ namespace BlackJack
 {
     public enum PlayerAction
     {
-
+        Hit,
+        Stand,
+        Double,
+        Split
     }
 }

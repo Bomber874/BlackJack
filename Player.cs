@@ -7,7 +7,8 @@ namespace BlackJack
     public class Player
     {
         public string Name { get; set; }
-        public List<Card> Cards = new List<Card>();
+        //public List<Card> Cards = new List<Card>();
+        public List<Card[]> Decks = new List<Card[]>();
         public Player(string name)
         {
             Name = name;
@@ -17,63 +18,105 @@ namespace BlackJack
         /// </summary>
         public void ClearCards()
         {
-            Cards.Clear();
+            Decks.Clear();
         }
-        public void AddCard(Card card)
+        public void AddDeck(Card card)
         {
-            Cards.Add(card);
+            Decks.Add(new Card[] {card});
+        }
+        public void AddCard(byte Deck, Card card)
+        {
+            Card[] OldCards = Decks[Deck];
+            Card[] NewCards = new Card[OldCards.Length+1];
+            for (byte i = 0; i < OldCards.Length; i++)
+            {
+                NewCards[i] = OldCards[i];
+            }
+            NewCards[OldCards.Length] = card;
+            Decks[Deck] = NewCards;
         }
 
-        public List<Card> GetSortedCards()
+        public Card RemoveLastCard(byte Deck)
         {
-            List<Card> SortedCards = Cards;
+            Card RemovedCard = Decks[Deck][Decks[Deck].Length - 1];
+            Card[] NewCards = new Card[Decks[Deck].Length - 1];
+            for (byte i = 0; i < Decks[Deck].Length-1; i++)
+            {
+                NewCards[i] = Decks[Deck][i];
+            }
+            Decks[Deck] = NewCards;
+            return RemovedCard;
+        }
+
+        public List<Card[]> GetSortedCards(byte Deck)
+        {
             CardsSorter sorter = new CardsSorter();
-            SortedCards.Sort(sorter);
+            List<Card[]> SortedCards = Decks;
+            for (byte i = 0; i<SortedCards.Count; i++)
+            {
+                Array.Sort(SortedCards[i], sorter);
+            }
+            //SortedCards.Sort(sorter);
             return SortedCards;
         }
 
-        public byte GetScore()
+        public byte[] GetScore()
         {
-            byte score = 0;
-            byte i = 0;
+            byte[] score = new byte[Decks.Count];
             byte aceCount = 0;
-            foreach (Card card in GetSortedCards())
+            for (byte i = 0; i < Decks.Count; i++)
             {
-                if ((int)card.Rank < 11)    // Карты с 2 до 10, считаем по их стоимости
+                foreach (Card[] cards in GetSortedCards(i))
                 {
-                    score += (byte)card.Rank;
-                    i++;
-                    continue;
+                    foreach (Card card in cards)
+                    {
+                        if ((int)card.Rank < 11)    // Карты с 2 до 10, считаем по их стоимости
+                        {
+                            score[i] += (byte)card.Rank;
+                            continue;
+                        }
+                        else if ((int)card.Rank < 14)    // Карты с рубашками, считаем за 10
+                        {
+                            score[i] += 10;
+                            continue;
+                        }
+                        if (score[i] + 11 <= 21)   // Первый туз, считаем за 11
+                        {
+                            score[i] += 11;
+                            aceCount++;
+                            continue;
+                        }
+                        else    // Последующие тузы, считаем за 1
+                        {
+                            score[i] += 1;
+                            continue;
+                        }
+                    }
                 }
-                else if((int)card.Rank < 14)    // Карты с рубашками, считаем за 10
-                {
-                    score += 10;
-                    i++;
-                    continue;
-                }
-                if (score + 11 <= 21)   // Первый туз, считаем за 11
-                {
-                    score += 11;
-                    i++;
-                    aceCount++;
-                    continue;
-                }
-                else    // Последующие тузы, считаем за 1
-                {
-                    score += 1;
-                    continue;
-                }
-
             }
             return score;
         }
-
-        public string GetCardsString()
+        public bool CanSplit(byte deck)
         {
-            string output = "|";
-            foreach (Card card in Cards)
+            if (Decks[deck][0].Rank == Decks[deck][1].Rank) // Если карды совпадают по значению
+                return true;
+            // Если карты являются картинками
+            if ((Decks[deck][0].Rank < (Rank)15 & Decks[deck][0].Rank > (Rank)10) & (Decks[deck][1].Rank < (Rank)15 & Decks[deck][1].Rank > (Rank)10))
             {
-                output = output + card.ToString() + "|"; 
+                return true;
+            }
+            return false;
+        }
+
+        public string[] GetCardsString()
+        {
+            string[] output = new string[Decks.Count];
+            for (byte i = 0; i < Decks.Count; i++)
+            {
+                foreach (Card card in Decks[i])
+                {
+                    output[i] += card.ToString() + "|";
+                }
             }
             return output;
         }
