@@ -43,8 +43,8 @@ namespace BlackJack
         {
             player.AddCard(deck, card);
             OnPlayerTakeCard?.Invoke(player, deck, card, ForceCard);
-            if (player.GetScore()[deck] > 21) return 1;     // >21
-            if (player.GetScore()[deck] < 21) return -1;    //<21
+            if (player.GetScore(deck) > 21) return 1;     // >21
+            if (player.GetScore(deck) < 21) return -1;    //<21
             return 0;   //21
         }
 
@@ -84,7 +84,7 @@ namespace BlackJack
 
             foreach (Player p in _Players)
             {
-                if (p.GetScore()[0] != 21)
+                if (p.GetScore(0) != 21)
                 {
                     PlayerActionsLoop(p, 0, null);
                 }
@@ -118,7 +118,7 @@ namespace BlackJack
                     }
                     break;
                 case PlayerAction.Stand:
-                    Console.WriteLine("Итоговые очки колоды:" + deck + "-" + player.GetScore()[deck]);
+                    Console.WriteLine("Итоговые очки колоды:" + deck + "-" + player.GetScore(deck));
                     PlayerActionsLoop(player, (byte)(deck + 1), null);
                     break;
                 case PlayerAction.Double:

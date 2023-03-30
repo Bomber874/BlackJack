@@ -48,52 +48,47 @@ namespace BlackJack
             return RemovedCard;
         }
 
-        public List<Card[]> GetSortedCards(byte Deck)
+        public Card[] GetSortedCards(byte Deck)
         {
             CardsSorter sorter = new CardsSorter();
-            List<Card[]> SortedCards = Decks;
-            for (byte i = 0; i<SortedCards.Count; i++)
+            Card[] SortedCards = Decks[Deck];
+            for (byte i = 0; i<SortedCards.Length; i++)
             {
-                Array.Sort(SortedCards[i], sorter);
+                Array.Sort(SortedCards, sorter);
             }
             //SortedCards.Sort(sorter);
             return SortedCards;
         }
 
-        public byte[] GetScore()
+        public byte GetScore(byte Deck)
         {
-            byte[] score = new byte[Decks.Count];
+            byte score = 0;
             byte aceCount = 0;
-            for (byte i = 0; i < Decks.Count; i++)
-            {
-                foreach (Card[] cards in GetSortedCards(i))
-                {
-                    foreach (Card card in cards)
-                    {
-                        if ((int)card.Rank < 11)    // Карты с 2 до 10, считаем по их стоимости
-                        {
-                            score[i] += (byte)card.Rank;
-                            continue;
-                        }
-                        else if ((int)card.Rank < 14)    // Карты с рубашками, считаем за 10
-                        {
-                            score[i] += 10;
-                            continue;
-                        }
-                        if (score[i] + 11 <= 21)   // Первый туз, считаем за 11
-                        {
-                            score[i] += 11;
-                            aceCount++;
-                            continue;
-                        }
-                        else    // Последующие тузы, считаем за 1
-                        {
-                            score[i] += 1;
-                            continue;
-                        }
-                    }
-                }
-            }
+
+             foreach (Card card in GetSortedCards(Deck))
+             {
+                 if ((int)card.Rank < 11)    // Карты с 2 до 10, считаем по их стоимости
+                 {
+                     score += (byte)card.Rank;
+                     continue;
+                 }
+                 else if ((int)card.Rank < 14)    // Карты с рубашками, считаем за 10
+                 {
+                     score += 10;
+                     continue;
+                 }
+                 if (score + 11 <= 21)   // Первый туз, считаем за 11
+                 {
+                     score += 11;
+                     aceCount++;
+                     continue;
+                 }
+                 else    // Последующие тузы, считаем за 1
+                 {
+                     score += 1;
+                     continue;
+                 }
+             }
             return score;
         }
         public bool CanSplit(byte deck)
