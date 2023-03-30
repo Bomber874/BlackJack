@@ -98,10 +98,11 @@ namespace BlackJack
         }
         public bool CanSplit(byte deck)
         {
+            if (Decks[deck].Length > 2) return false;   // Колоду возможно сплитить только на двух одинаковых картах
             if (Decks[deck][0].Rank == Decks[deck][1].Rank) // Если карды совпадают по значению
                 return true;
             // Если карты являются картинками
-            if ((Decks[deck][0].Rank < (Rank)15 & Decks[deck][0].Rank > (Rank)10) & (Decks[deck][1].Rank < (Rank)15 & Decks[deck][1].Rank > (Rank)10))
+            if ((Decks[deck][0].Rank < (Rank)15 & Decks[deck][0].Rank > (Rank)9) & (Decks[deck][1].Rank < (Rank)15 & Decks[deck][1].Rank > (Rank)9))
             {
                 return true;
             }
