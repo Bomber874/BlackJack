@@ -14,6 +14,27 @@ namespace BlackJack
         public int Balance { get => _Balance; }
         List<int> _Bet;
         public List<int> Bet { get => _Bet; }
+        public void GameEnds(byte deck, Outcome outcome)
+        {
+            switch (outcome)
+            {
+                case Outcome.Lose:
+                    _Bet[deck] = 0;
+                    break;
+                case Outcome.Draw:
+                    _Balance += _Bet[deck];
+                    _Bet[deck] = 0;
+                    break;
+                case Outcome.Win:
+                    _Balance += _Bet[deck]*2;
+                    _Bet[deck] = 0;
+                    break;
+                case Outcome.BlackJack:
+                    _Balance += Convert.ToInt32(Math.Floor(_Bet[deck] * 1.5));
+                    _Bet[deck] = 0;
+                    break;
+            }
+        }
         public Player(string name)
         {
             Name = name;

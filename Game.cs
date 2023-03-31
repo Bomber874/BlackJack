@@ -33,6 +33,9 @@ namespace BlackJack
         public delegate void PlayerDroppedFromGameHandler(Player player, string reason);
         public event PlayerDroppedFromGameHandler? PlayerDropped;
 
+        public delegate void OutcomeHandler(Player player, Outcome outcome);
+        public event OutcomeHandler? OnOutcome;
+
         Queue<Card> Cards = Deck.Generate(true);
 
         public List<Player> Players { get => _Players; }
@@ -54,13 +57,64 @@ namespace BlackJack
             return 0;   //21
         }
 
+        List<Card> GetSortedCards()
+        {
+            CardsSorter sorter = new CardsSorter();
+            List<Card> SortedCards = Croupier;
+            SortedCards.Sort(sorter);
+            return SortedCards;
+        }
+
+        byte GetScore()
+        {
+            byte score = 0;
+            byte aceCount = 0;
+
+            foreach (Card card in GetSortedCards())
+            {
+                if ((int)card.Rank < 11)    // Карты с 2 до 10, считаем по их стоимости
+                {
+                    score += (byte)card.Rank;
+                    continue;
+                }
+                else if ((int)card.Rank < 14)    // Карты с рубашками, считаем за 10
+                {
+                    score += 10;
+                    continue;
+                }
+                if (score + 11 <= 21)   // Первый туз, считаем за 11
+                {
+                    score += 11;
+                    aceCount++;
+                    continue;
+                }
+                else    // Последующие тузы, считаем за 1
+                {
+                    score += 1;
+                    continue;
+                }
+            }
+            return score;
+        }
+
+        byte CroupierGetCards()
+        {
+            byte Score = GetScore();
+            if (Score > 16)
+            {
+                return Score;
+            }
+            CroupierTakeCard(false);
+            return CroupierGetCards();
+        }
+
         public void Start(List<Player> players)
         {
             if (players.Count <= 0) return;
             if (players.Count > 5) return;
 
-            //Cards = Deck.Generate(true);
-            Cards = new Queue<Card>(new Card[] { new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 } });
+            Cards = Deck.Generate(true);
+            //Cards = new Queue<Card>(new Card[] { new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 } });
             _Players.Clear();
 
             foreach(Player p in players)
@@ -90,12 +144,13 @@ namespace BlackJack
                     {
                         if (AddPlayerCard(p, 0, Cards.Dequeue(), true) == 0)
                         {
-                            Console.WriteLine("Не Тут обработать блэкджек");
+                            Outcome?.Invoke(p, Outcome.)
+                            //BlackJack
+                            //Console.WriteLine("Не Тут обработать блэкджек");
                         }
                     }
-                    
                 }
-                CroupierTakeCard();
+                CroupierTakeCard(i>0);
             }
 
 
@@ -107,7 +162,15 @@ namespace BlackJack
                 }
                 else
                 {
-                    Console.WriteLine("Вот тут обработать блекджек");
+                    //BlackJack
+                }
+            }
+            byte CroupierScore = CroupierGetCards();
+            foreach(Player p in _Players)
+            {
+                for (int i = 0; i < p.Decks.Count; i++)
+                {
+
                 }
             }
 
@@ -184,17 +247,11 @@ namespace BlackJack
             }
             return new Player("");
         }
-        void CroupierTakeCard()
+        void CroupierTakeCard(bool HoleCard)
         {
-            _Croupier.Add(Cards.Dequeue());
-            if (Croupier.Count == 1)
-            {
-                OnCroupierTakeCard?.Invoke(false, Croupier[0]); // Первая карта кладётся на стол в открытую
-            }
-            else
-            {
-                OnCroupierTakeCard?.Invoke(true, null); // Остальные карты кладутся рубашкой к верху
-            }
+            Card card = Cards.Dequeue();
+            _Croupier.Add(card);
+            OnCroupierTakeCard?.Invoke(HoleCard, HoleCard ? null : card); // Остальные карты кладутся рубашкой к верху
         }
     }
 }
