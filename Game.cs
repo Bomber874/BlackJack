@@ -33,7 +33,7 @@ namespace BlackJack
         public delegate void PlayerDroppedFromGameHandler(Player player, string reason);
         public event PlayerDroppedFromGameHandler? PlayerDropped;
 
-        public delegate void OutcomeHandler(Player player, Outcome outcome);
+        public delegate void OutcomeHandler(Player player, byte deck, Outcome outcome);
         public event OutcomeHandler? OnOutcome;
 
         Queue<Card> Cards = Deck.Generate(true);
@@ -65,7 +65,7 @@ namespace BlackJack
             return SortedCards;
         }
 
-        byte GetScore()
+        public byte GetScore()
         {
             byte score = 0;
             byte aceCount = 0;
@@ -144,7 +144,7 @@ namespace BlackJack
                     {
                         if (AddPlayerCard(p, 0, Cards.Dequeue(), true) == 0)
                         {
-                            Outcome?.Invoke(p, Outcome.)
+                            OnOutcome?.Invoke(p, 0, Outcome.BlackJack);
                             //BlackJack
                             //Console.WriteLine("Не Тут обработать блэкджек");
                         }
@@ -168,9 +168,19 @@ namespace BlackJack
             byte CroupierScore = CroupierGetCards();
             foreach(Player p in _Players)
             {
-                for (int i = 0; i < p.Decks.Count; i++)
+                for (byte i = 0; i < p.Decks.Count; i++)
                 {
-
+                    if (p.Bet[i] == 0) continue;    // Если на этом этапе ставка == 0, значит у игрока блекджек(уже выплаченный)
+                    byte Score = p.GetScore(i);
+                    if (Score > 20) continue;   // Победы и проигрыши уже просчитаны
+                    if (Score == CroupierScore)
+                    {
+                        p.GameEnds(i, Outcome.Draw);
+                        OnOutcome?.Invoke(p, i, Outcome.Draw);
+                        continue;
+                    }
+                    p.GameEnds(i, Outcome.Lose);
+                    OnOutcome?.Invoke(p, i, Outcome.Lose);
                 }
             }
 
@@ -179,7 +189,7 @@ namespace BlackJack
         int PlayerBet(Player player, byte deck)
         {
             int Bet = (GetPlayerBet?.Invoke(player, deck)).GetValueOrDefault(50);
-            Bet = Bet < 0 ? 50 : Bet > player.Balance ? player.Balance : Bet;
+            Bet = Bet < 0 ? 50 : Bet > player.Balance ? Convert.ToInt32(player.Balance) : Bet;
             return Bet;
         }
         // TODO: Добавить события колоды: >21, 21 и тд
@@ -196,17 +206,18 @@ namespace BlackJack
                             PlayerActionsLoop(player, deck, null);
                             break;
                         case (0)://21
-                            Console.WriteLine("Колода:"+deck+", игрока:"+player.Name+" - набрала 21 очко");
+                            player.GameEnds(deck, Outcome.Win);
+                            OnOutcome?.Invoke(player, deck, Outcome.Win);
                             PlayerActionsLoop(player, (byte)(deck + 1), null);
                             break;
                         case (1)://>21
-                            Console.WriteLine("Колода:" + deck + ", игрока:" + player.Name + " - перебор");
+                            player.GameEnds(deck, Outcome.Lose);
+                            OnOutcome?.Invoke(player, deck, Outcome.Lose);
                             PlayerActionsLoop(player, (byte)(deck + 1), null);
                             break;
                     }
                     break;
                 case PlayerAction.Stand:
-                    Console.WriteLine("Итоговые очки колоды:" + deck + "-" + player.GetScore(deck));
                     PlayerActionsLoop(player, (byte)(deck + 1), null);
                     break;
                 case PlayerAction.Double:
@@ -215,8 +226,21 @@ namespace BlackJack
                         PlayerActionsLoop(player, deck, null);
                         return;
                     }
-                    AddPlayerCard(player, deck, Cards.Dequeue(), false);   // После удвоения ставки выдаётся карта, без возможности ходить ещё
                     player.AddBet(deck, player.Bet[deck]);
+                    switch (AddPlayerCard(player, deck, Cards.Dequeue(), false))
+                    {
+                        case (-1)://<21
+                            break;
+                        case (0)://21
+                            player.GameEnds(deck, Outcome.Win);
+                            OnOutcome?.Invoke(player, deck, Outcome.DoubleWin);
+                            break;
+                        case (1)://>21
+                            player.GameEnds(deck, Outcome.Lose);
+                            OnOutcome?.Invoke(player, deck, Outcome.DoubleLose);
+                            break;
+                    }
+                    //player.AddBet(deck, player.Bet[deck]);
                     PlayerActionsLoop(player, (byte)(deck + 1), null);
                     break;
                 case PlayerAction.Split:

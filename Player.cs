@@ -10,8 +10,8 @@ namespace BlackJack
         public string Name { get; set; }
         //public List<Card> Cards = new List<Card>();
         public List<Card[]> Decks = new List<Card[]>();
-        int _Balance;
-        public int Balance { get => _Balance; }
+        decimal _Balance;
+        public decimal Balance { get => _Balance; }
         List<int> _Bet;
         public List<int> Bet { get => _Bet; }
         public void GameEnds(byte deck, Outcome outcome)

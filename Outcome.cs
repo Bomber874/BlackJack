@@ -7,8 +7,11 @@ namespace BlackJack
     public enum Outcome
     {
         Lose,
+        DoubleLose,
         Draw,
+        DoubleDraw,
         Win,
+        DoubleWin,
         BlackJack
     }
 }
