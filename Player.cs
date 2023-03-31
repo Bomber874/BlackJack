@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace BlackJack
@@ -9,9 +10,31 @@ namespace BlackJack
         public string Name { get; set; }
         //public List<Card> Cards = new List<Card>();
         public List<Card[]> Decks = new List<Card[]>();
+        int _Balance;
+        public int Balance { get => _Balance; }
+        List<int> _Bet;
+        public List<int> Bet { get => _Bet; }
         public Player(string name)
         {
             Name = name;
+            _Balance = 1000;
+            _Bet = new List<int>();
+        }
+        public bool AddBet(byte Deck, int bet)
+        {
+            if (_Bet.Count <= Deck)
+            {
+                _Bet.Add(bet);
+                _Balance -= bet;
+                return true;    // дада
+            }
+            _Bet[Deck] += bet;
+            _Balance -= bet;
+            return true;    // дада
+        }
+        public bool CanDouble(byte deck)
+        {
+            return Balance - Bet[deck] >= 0;
         }
         /// <summary>
         /// Очищает карты игрока
@@ -22,13 +45,14 @@ namespace BlackJack
         }
         public void AddDeck(byte CurDeck, Card card)
         {
-            //Decks.Add(new Card[] {card});
             if (CurDeck == Decks.Count)
             {
                 Decks.Insert(CurDeck, new Card[] { card });
             }
             else
+            {
                 Decks.Insert(CurDeck + 1, new Card[] { card });
+            }
         }
         public void AddCard(byte Deck, Card card)
         {
@@ -100,6 +124,7 @@ namespace BlackJack
         public bool CanSplit(byte deck)
         {
             if (Decks[deck].Length > 2) return false;   // Колоду возможно сплитить только на двух одинаковых картах
+            if (!CanDouble(deck)) return false; // Сплит подразумевает и увеличение общей ставки
             if (Decks[deck][0].Rank == Decks[deck][1].Rank) // Если карды совпадают по значению
                 return true;
             // Если карты являются картинками

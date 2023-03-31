@@ -27,6 +27,12 @@ namespace BlackJack
         public delegate PlayerAction PlayerCationHandler(Player Player, byte deck);
         public event PlayerCationHandler? GetPlayerAction;
 
+        public delegate int PlayerBetHandler(Player player, byte deck);
+        public event PlayerBetHandler? GetPlayerBet;
+
+        public delegate void PlayerDroppedFromGameHandler(Player player, string reason);
+        public event PlayerDroppedFromGameHandler? PlayerDropped;
+
         Queue<Card> Cards = Deck.Generate(true);
 
         public List<Player> Players { get => _Players; }
@@ -57,14 +63,25 @@ namespace BlackJack
             Cards = new Queue<Card>(new Card[] { new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 }, new Card() { Rank = (Rank)4, Suit = (Suit)1 } });
             _Players.Clear();
 
+            foreach(Player p in players)
+            {
+                p.ClearCards();
+                if (p.Balance < 50)
+                {
+                    PlayerDropped?.Invoke(p, "У игрока не хватает на минимальную ставку");
+                    continue;
+                }
+                _Players.Add(p);
+                p.AddBet(0, PlayerBet(p, 0));
+
+            }
+
             for (byte i = 0; i < 2; i++)    // Первая сдача
             {
                 foreach (Player p in players)
                 {
                     if (i == 0)
                     {
-                        p.ClearCards();
-                        _Players.Add(p);
                         Card card = Cards.Dequeue();
                         p.AddDeck(0, card);
                         OnPlayerTakeCard?.Invoke(p, 0, card, true);
@@ -93,6 +110,14 @@ namespace BlackJack
                     Console.WriteLine("Вот тут обработать блекджек");
                 }
             }
+
+        }
+
+        int PlayerBet(Player player, byte deck)
+        {
+            int Bet = (GetPlayerBet?.Invoke(player, deck)).GetValueOrDefault(50);
+            Bet = Bet < 0 ? 50 : Bet > player.Balance ? player.Balance : Bet;
+            return Bet;
         }
         // TODO: Добавить события колоды: >21, 21 и тд
         void PlayerActionsLoop(Player player, byte deck, Card? card)
@@ -122,7 +147,13 @@ namespace BlackJack
                     PlayerActionsLoop(player, (byte)(deck + 1), null);
                     break;
                 case PlayerAction.Double:
+                    if (!player.CanDouble(deck))
+                    {
+                        PlayerActionsLoop(player, deck, null);
+                        return;
+                    }
                     AddPlayerCard(player, deck, Cards.Dequeue(), false);   // После удвоения ставки выдаётся карта, без возможности ходить ещё
+                    player.AddBet(deck, player.Bet[deck]);
                     PlayerActionsLoop(player, (byte)(deck + 1), null);
                     break;
                 case PlayerAction.Split:
@@ -132,6 +163,7 @@ namespace BlackJack
                         return;
                     }
                     player.AddDeck(deck, player.RemoveLastCard(deck));
+                    player.AddBet((byte)(deck+1), player.Bet[deck]);
                     AddPlayerCard(player, deck, Cards.Dequeue(), false);
                     AddPlayerCard(player, (byte)(deck + 1), Cards.Dequeue(), false);
                     PlayerActionsLoop(player, deck, null);
