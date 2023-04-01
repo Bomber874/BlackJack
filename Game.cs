@@ -14,6 +14,8 @@ namespace BlackJack
         /// <param name="Card">Если карта взята в открытую, содержит карту, иначе - NULL</param>
         public delegate void CroupierTakeCardHandler(bool HoleCard, Card? Card);
         public event CroupierTakeCardHandler? OnCroupierTakeCard;
+        public delegate void CroupierShowsCardHandler();
+        public event CroupierShowsCardHandler? OnCroupierShowsCard;
         /// <summary>
         /// Вызывается при выдаче игроку карты
         /// </summary>
@@ -165,6 +167,7 @@ namespace BlackJack
                     //BlackJack
                 }
             }
+            OnCroupierShowsCard?.Invoke();
             byte CroupierScore = CroupierGetCards();
             foreach(Player p in _Players)
             {
@@ -177,10 +180,17 @@ namespace BlackJack
                     {
                         p.GameEnds(i, Outcome.Draw);
                         OnOutcome?.Invoke(p, i, Outcome.Draw);
-                        continue;
                     }
-                    p.GameEnds(i, Outcome.Lose);
-                    OnOutcome?.Invoke(p, i, Outcome.Lose);
+                    if (Score > CroupierScore)
+                    {
+                        p.GameEnds(i, Outcome.Win);
+                        OnOutcome?.Invoke(p, i, Outcome.Win);
+                    }
+                    if (Score < CroupierScore)
+                    {
+                        p.GameEnds(i, Outcome.Lose);
+                        OnOutcome?.Invoke(p, i, Outcome.Lose);
+                    }
                 }
             }
 
