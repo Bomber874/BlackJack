@@ -51,44 +51,5 @@ namespace BlackJack
                 return queue;
             }
         }
-        //static public Card[] Generate(bool shuffle)
-        //{
-        //    if (shuffle)
-        //    {
-        //        Random random = new Random();
-        //        Card[] cards = new Card[52];
-        //        for (int i = 0; i < 4; i++)
-        //        {
-        //            for (int j = 0; j < 13; j++)
-        //            {
-        //                //(Rank)j+2 - Для удобства, начало перечисления с двойки
-        //                cards[i * 13 + j] = new Card { Rank = (Rank)j + 2, Suit = (Suit)i };
-        //            }
-        //        }
-        //        // Перемешиваем
-        //        for (int i = 51; i >= 1; i--)
-        //        {
-        //            int j = random.Next(i + 1);
-        //            // обменять значения data[j] и data[i]
-        //            var temp = cards[j];
-        //            cards[j] = cards[i];
-        //            cards[i] = temp;
-        //        }
-        //        return cards;
-        //    }
-        //    else
-        //    {
-        //        Card[] cards = new Card[52];
-        //        for (int i = 0; i < 4; i++)
-        //        {
-        //            for (int j = 0; j < 13; j++)
-        //            {
-        //                //(Rank)j+2 - Для удобства, начало перечисления с двойки
-        //                cards[i * 13 + j] = new Card { Rank = (Rank)j + 2, Suit = (Suit)i };
-        //            }
-        //        }
-        //        return cards;
-        //    }
-        //}
     }
 }

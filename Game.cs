@@ -148,7 +148,6 @@ namespace BlackJack
                         {
                             OnOutcome?.Invoke(p, 0, Outcome.BlackJack);
                             //BlackJack
-                            //Console.WriteLine("Не Тут обработать блэкджек");
                         }
                     }
                 }
@@ -202,7 +201,7 @@ namespace BlackJack
             Bet = Bet < 0 ? 50 : Bet > player.Balance ? Convert.ToInt32(player.Balance) : Bet;
             return Bet;
         }
-        // TODO: Добавить события колоды: >21, 21 и тд
+
         void PlayerActionsLoop(Player player, byte deck, Card? card)
         {
             if (deck >= player.Decks.Count)
@@ -250,7 +249,6 @@ namespace BlackJack
                             OnOutcome?.Invoke(player, deck, Outcome.DoubleLose);
                             break;
                     }
-                    //player.AddBet(deck, player.Bet[deck]);
                     PlayerActionsLoop(player, (byte)(deck + 1), null);
                     break;
                 case PlayerAction.Split:

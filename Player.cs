@@ -8,7 +8,6 @@ namespace BlackJack
     public class Player
     {
         public string Name { get; set; }
-        //public List<Card> Cards = new List<Card>();
         public List<Card[]> Decks = new List<Card[]>();
         decimal _Balance;
         public decimal Balance { get => _Balance; }
@@ -107,7 +106,6 @@ namespace BlackJack
             {
                 Array.Sort(SortedCards, sorter);
             }
-            //SortedCards.Sort(sorter);
             return SortedCards;
         }
 
