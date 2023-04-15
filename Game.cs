@@ -175,6 +175,12 @@ namespace BlackJack
                     if (p.Bet[i] == 0) continue;    // Если на этом этапе ставка == 0, значит у игрока блекджек(уже выплаченный)
                     byte Score = p.GetScore(i);
                     if (Score > 20) continue;   // Победы и проигрыши уже просчитаны
+                    if (CroupierScore > 21)
+                    {
+                        p.GameEnds(i, Outcome.Win);
+                        OnOutcome?.Invoke(p, i, Outcome.Win);
+                        continue;
+                    }
                     if (Score == CroupierScore)
                     {
                         p.GameEnds(i, Outcome.Draw);
